@@ -1,0 +1,38 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "pendo"
+authors = [{name = "Galileo Technologies, Inc", email = "team@rungalileo.io"}]
+description = "An unofficial client for the Pendo API."
+dynamic = ["version"]
+readme = "README.md"
+requires-python = ">=3.9.8"
+dependencies = [
+    "requests >=2.22.0",
+    "pydantic >=1.5.1",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest >=6.2.5",
+    "coverage >=6.1.1",
+    "pytest-cov >=3.0.0",
+]
+dev = [
+    "flake8 >=3.9.2",
+    "mypy >=0.910",
+    "black >=21.10b0",
+    "isort >=5.9.3",
+    "autoflake >=1.4",
+    "flake8-docstrings >=1.6.0",
+    "pre-commit >=2.17.0",
+    "types-requests >=0.3.2",
+]
+
+[tool.isort]
+profile = "black"
+
+[project.urls]
+Documentation = "https://www.github.com/rungalileo/pendo"
