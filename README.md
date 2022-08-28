@@ -20,6 +20,8 @@ pip install pendo
 
 #### [Server Side Track Events](https://support.pendo.io/hc/en-us/articles/360032294291-Track-Events-Configuration#server-side-0-7)
 
+A Pendo Admin can access the `pendo_integration_key` in your app settings via: Subscription Settings > Choose your App > App Details.
+
 ```python
 from pendo import Pendo
 
