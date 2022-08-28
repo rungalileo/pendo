@@ -3,4 +3,4 @@
 from pendo.main import Pendo
 
 __all__ = ["Pendo"]
-__version__ = "0.0.2"
+__version__ = "0.0.3"
