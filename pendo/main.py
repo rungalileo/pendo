@@ -1,9 +1,11 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import requests
 
 from pendo.const import PENDO_URL
 from pendo.types import PendoResponse, PendoTrackEvent
+
+from .exc import PendoException
 
 
 class Pendo:
@@ -19,7 +21,7 @@ class Pendo:
     """
 
     def __init__(
-        self, pendo_integration_key: str, extra_headers: Optional[Dict]
+        self, pendo_integration_key: str, extra_headers: Optional[Dict] = dict()
     ) -> None:
         self.pendo_integration_key = pendo_integration_key
         self.extra_headers = extra_headers
@@ -45,11 +47,14 @@ class Pendo:
             return {**self.extra_headers, **self.__headers()}
         return self.__headers()
 
-    def track(self, event: PendoTrackEvent, url: Optional[str] = None) -> PendoResponse:
+    def track(
+        self, event: Union[Dict, PendoTrackEvent], url: Optional[str] = None
+    ) -> PendoResponse:
         """Track an event.
 
         Args:
-            event (PendoTrackEvent): The track event to be used as a POST request body.
+            event (Union[Dict, PendoTrackEvent]): The track event to be used as a POST
+                request body.
             url (Optional[str]): The URL to send the POST request to. Defaults to the
                 PENDO_URL constant. Defaults as None.
 
@@ -58,7 +63,13 @@ class Pendo:
         """
         if url is None:
             url = PENDO_URL
+        if isinstance(event, dict):
+            event = PendoTrackEvent(**event)
         response = requests.post(
             f"{url}/data/track", json=event.dict(), headers=self.headers()
         )
-        return PendoResponse(status_code=response.status_code, body=response.json())
+        if not response.ok:
+            raise PendoException(
+                f"Request exited with status {response.status_code}: {response.reason}"
+            )
+        return PendoResponse(status_code=response.status_code)

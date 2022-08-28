@@ -9,10 +9,6 @@ class PendoEventType(str, Enum):
     track = "track"
 
 
-class Event(BaseModel):
-    ...
-
-
 class PendoProperties(BaseModel):
     ...
 
@@ -21,7 +17,7 @@ class PendoContext(BaseModel):
     ...
 
 
-class PendoTrackEvent(Event):
+class PendoTrackEvent(BaseModel):
     event: StrictStr
     visitorId: StrictStr
     accountId: StrictStr
@@ -33,7 +29,6 @@ class PendoTrackEvent(Event):
 
 class Response(BaseModel):
     status_code: StrictInt
-    body: Dict
 
 
 class PendoResponse(Response):
