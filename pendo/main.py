@@ -25,12 +25,22 @@ class Pendo:
         self.extra_headers = extra_headers
 
     def __headers(self) -> Dict:
+        """Private method to return the headers for the request.
+
+        Returns:
+            Dict: The private headers.
+        """
         return {
             "Content-Type": "application/json; charset=utf-8",
             "x-pendo-integration-key": self.pendo_integration_key,
         }
 
     def headers(self) -> Dict:
+        """Return the headers for the request.
+
+        Returns:
+            Dict: The headers.
+        """
         if self.extra_headers:
             return {**self.extra_headers, **self.__headers()}
         return self.__headers()
@@ -48,5 +58,7 @@ class Pendo:
         """
         if url is None:
             url = PENDO_URL
-        response = requests.post(url, json=event.dict(), headers=self.headers())
+        response = requests.post(
+            f"{url}/data/track", json=event.dict(), headers=self.headers()
+        )
         return PendoResponse(status_code=response.status_code, body=response.json())
