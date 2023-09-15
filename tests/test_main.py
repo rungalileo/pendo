@@ -1,5 +1,5 @@
 import time
-from unittest import mock
+from http import HTTPStatus
 
 import pytest
 
@@ -8,29 +8,20 @@ from pendo.exc import PendoException
 from pendo.types import PendoTrackEvent
 
 
-@mock.patch(
-    "pendo.main.requests.post",
-    return_value=mock.Mock(
-        status_code=200, json=mock.Mock(return_value={"status": "ok"}), ok=True
-    ),
-)
-def test_pendo(
-    mock_post: mock.MagicMock, pendo_client: Pendo, pendo_track_event: PendoTrackEvent
-) -> None:
+def test_live_pendo(pendo_client: Pendo, pendo_track_event: PendoTrackEvent) -> None:
+    with pytest.raises(Exception):
+        pendo_client.track(event=pendo_track_event)
+
+
+@pytest.mark.usefixtures("ok_request")
+def test_pendo(pendo_client: Pendo, pendo_track_event: PendoTrackEvent) -> None:
     response = pendo_client.track(event=pendo_track_event)
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
-@mock.patch(
-    "pendo.main.requests.post",
-    return_value=mock.Mock(
-        status_code=500,
-        reason="Internal Server Error",
-        ok=False,
-    ),
-)
+@pytest.mark.usefixtures("error_request")
 def test_pendo_catch_exception(
-    mock_post: mock.MagicMock, pendo_client: Pendo, pendo_track_event: PendoTrackEvent
+    pendo_client: Pendo, pendo_track_event: PendoTrackEvent
 ) -> None:
     with pytest.raises(PendoException) as exc_info:
         pendo_client.track(event=pendo_track_event)
@@ -40,46 +31,24 @@ def test_pendo_catch_exception(
     )
 
 
-@mock.patch(
-    "pendo.main.requests.post",
-    return_value=mock.Mock(
-        status_code=200, json=mock.Mock(return_value={"status": "ok"}), ok=True
-    ),
-)
+@pytest.mark.usefixtures("ok_request")
 def test_pendo_with_extra_headers(
-    mock_post: mock.MagicMock,
-    pendo_client_extra_headers: Pendo,
-    pendo_track_event: PendoTrackEvent,
+    pendo_client_extra_headers: Pendo, pendo_track_event: PendoTrackEvent
 ) -> None:
     response = pendo_client_extra_headers.track(event=pendo_track_event)
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
-@mock.patch(
-    "pendo.main.requests.post",
-    return_value=mock.Mock(
-        status_code=200, json=mock.Mock(return_value={"status": "ok"}), ok=True
-    ),
-)
+@pytest.mark.usefixtures("ok_request")
 def test_pendo_track_event_with_props_and_context(
-    mock_post: mock.MagicMock,
-    pendo_client: Pendo,
-    pendo_track_event_with_props_and_context: PendoTrackEvent,
+    pendo_client: Pendo, pendo_track_event_with_props_and_context: PendoTrackEvent
 ) -> None:
     response = pendo_client.track(event=pendo_track_event_with_props_and_context)
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
-@mock.patch(
-    "pendo.main.requests.post",
-    return_value=mock.Mock(
-        status_code=200, json=mock.Mock(return_value={"status": "ok"}), ok=True
-    ),
-)
-def test_pendo_track_event_dict_input(
-    mock_post: mock.MagicMock,
-    pendo_client: Pendo,
-) -> None:
+@pytest.mark.usefixtures("ok_request")
+def test_pendo_track_event_dict_input(pendo_client: Pendo) -> None:
     response = pendo_client.track(
         {
             "event": "TestEvent",
@@ -88,19 +57,11 @@ def test_pendo_track_event_dict_input(
             "timestamp": int(time.time() * 1000),
         }
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
-@mock.patch(
-    "pendo.main.requests.post",
-    return_value=mock.Mock(
-        status_code=200, json=mock.Mock(return_value={"status": "ok"}), ok=True
-    ),
-)
-def test_pendo_track_event_custom_event(
-    mock_post: mock.MagicMock,
-    pendo_client: Pendo,
-) -> None:
+@pytest.mark.usefixtures("ok_request")
+def test_pendo_track_event_custom_event(pendo_client: Pendo) -> None:
     response = pendo_client.track(
         {
             "event": "TestEvent",
@@ -111,4 +72,4 @@ def test_pendo_track_event_custom_event(
             "context": {"more": "more", "testing": "testing", "one": {"two": "three"}},
         }
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK

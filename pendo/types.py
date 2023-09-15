@@ -1,4 +1,5 @@
 from enum import Enum, unique
+from http import HTTPStatus
 from typing import Dict, Union
 
 from pydantic import BaseModel, StrictInt, StrictStr
@@ -28,7 +29,8 @@ class PendoTrackEvent(BaseModel):
 
 
 class Response(BaseModel):
-    status_code: StrictInt
+    status_code: HTTPStatus
+    data: dict
 
 
 class PendoResponse(Response):

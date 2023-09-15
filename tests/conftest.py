@@ -1,8 +1,9 @@
-import socket
 import time
+from http import HTTPStatus
 from typing import Any, Generator
 
 import pytest
+from requests import Response
 
 from pendo import Pendo
 from pendo.types import PendoTrackEvent
@@ -31,21 +32,45 @@ def pendo_track_event() -> PendoTrackEvent:
 
 
 @pytest.fixture()
-def pendo_track_event_with_props_and_context() -> PendoTrackEvent:
+def pendo_track_event_with_props_and_context(
+    pendo_track_event: PendoTrackEvent,
+) -> PendoTrackEvent:
     return PendoTrackEvent(
-        event="TestEvent",
-        visitorId="TestVisitorId",
-        accountId="TestAccountId",
-        timestamp=int(time.time() * 1000),
+        event=pendo_track_event.event,
+        visitorId=pendo_track_event.visitorId,
+        accountId=pendo_track_event.accountId,
+        timestamp=pendo_track_event.timestamp,
         properties={"test": "test"},
         context={"test": "test"},
     )
 
 
-def guard(*args: Any, **kwargs: Any) -> None:
-    raise Exception(
-        "No external network access allowed during tests."
-    )  # pragma: no cover
+@pytest.fixture
+def ok_request(monkeypatch: pytest.MonkeyPatch) -> None:
+    def mock_request(*args: Any, **kwargs: Any) -> Response:
+        response = Response()
+        response.status_code = HTTPStatus.OK
+
+        return response
+
+    monkeypatch.setattr("requests.Session.request", mock_request)
 
 
-socket.socket = guard  # type: ignore
+@pytest.fixture
+def error_request(monkeypatch: pytest.MonkeyPatch) -> None:
+    def mock_request(*args: Any, **kwargs: Any) -> Response:
+        response = Response()
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        response.reason = "Internal Server Error"
+
+        return response
+
+    monkeypatch.setattr("requests.Session.request", mock_request)
+
+
+@pytest.fixture(autouse=True)
+def guard_socket(monkeypatch: pytest.MonkeyPatch) -> None:
+    def mock_socket(*args: Any, **kwargs: Any) -> None:
+        raise Exception("No external network access allowed during tests.")
+
+    monkeypatch.setattr("socket.socket", mock_socket)
