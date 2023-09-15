@@ -9,17 +9,10 @@ description = "An unofficial client for the Pendo API."
 dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.9.8"
-dependencies = [
-    "requests >=2.22.0",
-    "pydantic >=1.5.1",
-]
+dependencies = ["requests >=2.22.0", "pydantic >=1.5.1"]
 
 [project.optional-dependencies]
-test = [
-    "pytest >=6.2.5",
-    "coverage >=6.1.1",
-    "pytest-cov >=3.0.0",
-]
+test = ["pytest >=6.2.5", "coverage >=6.1.1", "pytest-cov >=3.0.0"]
 dev = [
     "flake8 >=3.9.2",
     "mypy >=0.910",
@@ -34,5 +27,19 @@ dev = [
 [tool.isort]
 profile = "black"
 
+[tool.black]
+line-length = 88
+
 [project.urls]
 Documentation = "https://www.github.com/rungalileo/pendo"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov=pendo",
+    "--cov=tests",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "-o console_output_style=progress",
+    "--disable-warnings",
+    "--cov-fail-under=100",
+]
